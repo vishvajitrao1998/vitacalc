@@ -15,9 +15,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
+import { AdBanner, initAds } from './ads';
 import { Text, TextInput, useAppFonts } from './fonts';
 import { HistoryScreen, shareApp, useHistory } from './history';
-
 /* ---------- Brand & theme ---------- */
 const BRAND = 'VitaCalc';
 const VERSION = '1.0.0';
@@ -610,6 +610,7 @@ function Doc({ c, dark, setDark, id, go }) {
 
 /* ---------- App ---------- */
 export default function App() {
+  useEffect(() => { initAds(); }, []);
   const [dark, setDark] = useState(true);
   const [screen, go] = useState('splash');
   const c = dark ? T.dark : T.light;
@@ -622,12 +623,13 @@ export default function App() {
   else if (screen === 'settings') view = <Settings c={c} dark={dark} setDark={setDark} go={go} />;
 
   else if (screen === 'history') view = <HistoryScreen c={c} dark={dark} setDark={setDark} go={go} h={hist} Header={Header} IconBtn={IconBtn} Chart={Chart} />; else if (screen.startsWith('doc:')) view = <Doc c={c} dark={dark} setDark={setDark} id={screen.slice(4)} go={go} />;
-  else view = <Calc key={screen} c={c} dark={dark} setDark={setDark} calc={CALCS.find((k) => k.id === screen)} back={() => go('home')} onSave={hist.add} />;
+  else view = <Calc key={screen} c={c} dark={dark} setDark={setDark} calc={CALCS.find((k) => k.id === screen)} back={() => { maybeShowInterstitial(3); go('home'); }} onSave={hist.add} />;
   const light = screen !== 'splash' && !dark;
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: screen === 'splash' ? T.dark.bg : c.bg }}>
       <StatusBar barStyle={light ? 'dark-content' : 'light-content'} backgroundColor={screen === 'splash' ? T.dark.bg : c.bg} />
       {view}
+      {screen !== 'splash' && <AdBanner />}
     </SafeAreaView>
   );
 }
