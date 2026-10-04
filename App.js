@@ -55,7 +55,7 @@ const bmr = (v) => 10 * v.weight + 6.25 * v.height - 5 * v.age + (v.sex === 'Mal
 /* ---------- Calculators ---------- */
 const base = [
   { k: 'sex', label: 'Sex', type: 'sel', opts: SEX, def: 'Male' },
-  { k: 'age', label: 'Age', unit: 'years', def: '28' },
+  { k: 'age', label: 'Age', unit: 'Years', def: '28' },
   { k: 'height', label: 'Height', unit: 'cm', def: '172' },
   { k: 'weight', label: 'Weight', unit: 'kg', def: '70' },
 ];
@@ -210,7 +210,7 @@ const CALCS = [
       let nb = new Date(Date.UTC(v.on.getUTCFullYear(), v.dob.getUTCMonth(), v.dob.getUTCDate()));
       if (nb < v.on) nb = new Date(Date.UTC(v.on.getUTCFullYear() + 1, v.dob.getUTCMonth(), v.dob.getUTCDate()));
       return {
-        main: a.y, unit: 'years', note: `${a.m} months, ${a.d} days`,
+        main: a.y, unit: 'Years', note: `${a.m} Months, ${a.d} Days`,
         rows: [['Total days', `${dayDiff(v.dob, v.on).toLocaleString()}`], ['Total weeks', `${Math.floor(dayDiff(v.dob, v.on) / 7).toLocaleString()}`], ['Next birthday in', `${dayDiff(v.on, nb)} days`]],
       };
     },
@@ -258,7 +258,7 @@ const CALCS = [
       const d = ymd(o, y);
       return {
         main: `${d.y}y ${d.m}m`, unit: `and ${d.d} days apart`, note: `Person ${v.a <= v.b ? 1 : 2} is older`,
-        rows: [['Total days', dayDiff(o, y).toLocaleString()], ['Total months', `${d.y * 12 + d.m}`]],
+        rows: [['Total days', dayDiff(o, y).toLocaleString()], ['Total Months', `${d.y * 12 + d.m}`]],
       };
     },
   },
@@ -457,7 +457,7 @@ function Splash({ onStart }) {
         <Text style={{ color: T.dark.text, fontSize: 38, fontWeight: '800', letterSpacing: 0.5 }}><View style={{ width: '100%' }}>
           <GradText style={{ fontSize: 38, fontWeight: '800', letterSpacing: 0.5, textAlign: 'center' }}>{BRAND}</GradText>
         </View></Text>
-        <Text style={{ color: T.dark.sub, fontSize: 15, marginTop: 6 }}>Health numbers, made simple</Text>
+        <Text style={{ color: T.dark.sub, fontSize: 15, marginTop: 6 }}>Making Health Calculations Simple</Text>
       </Animated.View>
       <Animated.View style={{ opacity: btn, width: '100%', marginTop: 56, transform: [{ translateY: btn.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }}>
         <GradButton label="Let's Calculate" icon="arrow-forward" onPress={onStart} />
@@ -473,8 +473,8 @@ function Home({ c, dark, setDark, go }) {
         title={<View style={{ flexDirection: 'row', alignItems: 'center' }}><Mark size={34} /><View style={{ marginLeft: 10 }}><GradText style={s.hTitle}>{BRAND}</GradText></View></View>}
         right={<><IconBtn c={c} name="time-outline" label="History" onPress={() => go('history')} /><IconBtn c={c} name="settings-outline" label="Settings" onPress={() => go('settings')} /></>} />
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
-        <Text style={{ color: c.text, fontSize: 24, fontWeight: '700' }}>What do you want to Calculate?</Text>
-        <Text style={{ color: c.sub, marginTop: 4, marginBottom: 16 }}>{CALCS.length} Calculators, All on your device.</Text>
+        <GradText style={s.hTitle}><Text style={{ color: c.text, fontSize: 24, fontWeight: '700' }}>Making Health Calculations Easy!</Text></GradText>
+        <Text style={{ color: c.sub, marginTop: 4, marginBottom: 16 }}>{CALCS.length} Calculators, All on your Device.Enjoy Your Calculations !</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', }}>
           {CALCS.map((k) => (
             <Pressable key={k.id} onPress={() => go(k.id)} style={({ pressed }) => [s.tile, { backgroundColor: c.card, borderColor: c.line, opacity: pressed ? 0.7 : 1 }]}>
@@ -637,7 +637,7 @@ const s = StyleSheet.create({
   hTitle: { fontSize: 20, fontWeight: '800', flexShrink: 1, lineHeight: 26, includeFontPadding: false },
   iconBtn: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, marginLeft: 8 },
   btn: { height: 54, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
-  btnTxt: { color: '#fff', fontSize: 17, fontWeight: '700' },
+  btnTxt: { color: '#fff', fontSize: 17, fontWeight: '700', marginBottom: 4 },
   tile: { width: '48%', borderRadius: 20, borderWidth: 1, padding: 16, marginBottom: 12 },
   tileIcon: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   card: { borderRadius: 22, borderWidth: 1, padding: 18 },
