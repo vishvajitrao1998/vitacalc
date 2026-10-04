@@ -1,11 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Animated, Easing,
-  StatusBar, Linking, StyleSheet, SafeAreaView, Platform, Pressable,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Circle } from 'react-native-svg';
 import { Ionicons, MaterialCommunityIcons as MCI } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Animated, Easing,
+  Linking,
+  Platform, Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Switch,
+  Text, TextInput, TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Circle } from 'react-native-svg';
+import { HistoryScreen, shareApp, useHistory } from './history';
 
 /* ---------- Brand & theme ---------- */
 const BRAND = 'VitaCalc';
@@ -363,7 +372,7 @@ function Home({ c, dark, setDark, go }) {
     <View style={{ flex: 1 }}>
       <Header c={c} dark={dark} setDark={setDark}
         title={<View style={{ flexDirection: 'row', alignItems: 'center' }}><Mark size={34} /><Text style={[s.hTitle, { color: c.text, marginLeft: 10 }]}>{BRAND}</Text></View>}
-        right={<IconBtn c={c} name="settings-outline" label="Settings" onPress={() => go('settings')} />} />
+        right={<><IconBtn c={c} name="time-outline" label="History" onPress={() => go('history')} /><IconBtn c={c} name="settings-outline" label="Settings" onPress={() => go('settings')} /></>} />
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
         <Text style={{ color: c.text, fontSize: 24, fontWeight: '700' }}>What do you want to calculate?</Text>
         <Text style={{ color: c.sub, marginTop: 4, marginBottom: 16 }}>{CALCS.length} calculators, all on your device.</Text>
@@ -381,10 +390,12 @@ function Home({ c, dark, setDark, go }) {
   );
 }
 
-function Calc({ c, dark, setDark, calc, back }) {
+function Calc({ c, dark, setDark, calc, back, onSave  }) {
   const [vals, setVals] = useState(Object.fromEntries(calc.fields.map((f) => [f.k, f.def])));
   const [res, setRes] = useState(null);
   const set = (k, x) => { setVals({ ...vals, [k]: x }); setRes(null); };
+  useEffect(() => { if (res && !res.error) onSave(calc, vals, res); }, [res]);
+  
   const submit = () => {
     const p = {};
     for (const f of calc.fields) {
@@ -467,6 +478,8 @@ function Settings({ c, dark, setDark, go }) {
         <View style={[s.card, { backgroundColor: c.card, borderColor: c.line, marginTop: 20, paddingVertical: 4 }]}>
           <Row icon="moon-outline" label="Dark mode"><Switch value={dark} onValueChange={setDark} trackColor={{ true: '#8B5CF6' }} /></Row>
           <Row icon="resize-outline" label="Units" value="Metric (kg, cm)" />
+          <Row icon="time-outline" label="History" onPress={() => go('history')} />
+`         <Row icon="share-social-outline" label="Share app" onPress={shareApp} />
           <Row icon="information-circle-outline" label="About app" onPress={() => go('doc:about')} />
           <Row icon="pricetag-outline" label="App version" value={VERSION} />
           <Row icon="mail-outline" label="Contact support" onPress={() => Linking.openURL(`mailto:${SUPPORT}?subject=${BRAND} support`)} />
@@ -496,12 +509,14 @@ export default function App() {
   const [dark, setDark] = useState(true);
   const [screen, go] = useState('splash');
   const c = dark ? T.dark : T.light;
+  const hist = useHistory();
   let view;
   if (screen === 'splash') view = <Splash onStart={() => go('home')} />;
   else if (screen === 'home') view = <Home c={c} dark={dark} setDark={setDark} go={go} />;
   else if (screen === 'settings') view = <Settings c={c} dark={dark} setDark={setDark} go={go} />;
-  else if (screen.startsWith('doc:')) view = <Doc c={c} dark={dark} setDark={setDark} id={screen.slice(4)} go={go} />;
-  else view = <Calc key={screen} c={c} dark={dark} setDark={setDark} calc={CALCS.find((k) => k.id === screen)} back={() => go('home')} />;
+
+  else if (screen === 'history') view = <HistoryScreen c={c} dark={dark} setDark={setDark} go={go} h={hist} Header={Header} IconBtn={IconBtn} Chart={Chart} />; else if (screen.startsWith('doc:')) view = <Doc c={c} dark={dark} setDark={setDark} id={screen.slice(4)} go={go} />;
+  else view = <Calc key={screen} c={c} dark={dark} setDark={setDark} calc={CALCS.find((k) => k.id === screen)} back={() => go('home')} onSave={hist.add} />;
   const light = screen !== 'splash' && !dark;
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: screen === 'splash' ? T.dark.bg : c.bg, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>
