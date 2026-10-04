@@ -3,8 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system/legacy'; // SDK 53 or older: use 'expo-file-system'
 import * as Sharing from 'expo-sharing';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
-
+import { Alert, ScrollView, Share, TouchableOpacity, View } from 'react-native';
+import { Text } from './fonts';
 const NAME = 'VitaCalc';
 const KEY = 'vitacalc_history';
 // TODO: replace with your real store link

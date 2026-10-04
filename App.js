@@ -1,19 +1,21 @@
 import { Ionicons, MaterialCommunityIcons as MCI } from '@expo/vector-icons';
+import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
 import {
   Animated, Easing,
   Linking,
-  Platform, Pressable,
+  Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
   Switch,
-  Text, TextInput, TouchableOpacity,
-  View,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
+import { Text, TextInput, useAppFonts } from './fonts';
 import { HistoryScreen, shareApp, useHistory } from './history';
 
 /* ---------- Brand & theme ---------- */
@@ -62,15 +64,26 @@ const act = { k: 'act', label: 'Activity level', type: 'sel', opts: ACT, def: 'M
 const CALCS = [
   {
     id: 'bmi', title: 'BMI Calculator', icon: 'human-male-height', desc: 'Body mass index',
-    fields: [base[2], base[3]],
+    fields: [
+      { k: 'hu', label: 'Height unit', type: 'sel', opts: ['cm', 'ft + in'], def: 'cm' },
+      { ...base[2], show: (v) => v.hu === 'cm' },
+      { k: 'ft', label: 'Height', unit: 'ft', def: '5', show: (v) => v.hu === 'ft + in' },
+      { k: 'inch', label: 'Height', unit: 'in', def: '8', zero: true, show: (v) => v.hu === 'ft + in' },
+      base[3],
+    ],
     run: (v) => {
-      const b = v.weight / (v.height / 100) ** 2;
+      const h = v.hu === 'cm' ? v.height : (v.ft * 12 + v.inch) * 2.54;
+      const m2 = (h / 100) ** 2, b = v.weight / m2;
       const cat = b < 18.5 ? 'Underweight' : b < 25 ? 'Healthy' : b < 30 ? 'Overweight' : 'Obese';
-      const lo = 18.5 * (v.height / 100) ** 2, hi = 24.9 * (v.height / 100) ** 2;
       return {
         main: r1(b), unit: 'BMI', note: cat,
-        rows: [['Healthy weight range', `${r1(lo)} – ${r1(hi)} kg`]],
         chart: { type: 'scale', value: b, min: 12, max: 40, segs: [['Under', 18.5], ['Healthy', 25], ['Over', 30], ['Obese', 40]] },
+        table: [
+          ['Underweight', 'Below 18.5', `Less than ${r1(18.5 * m2)} kg`, '#A9ADB1', b < 18.5],
+          ['Healthy', '18.5 – 24.9', `${r1(18.5 * m2)} – ${r1(24.9 * m2)} kg`, '#4F7F0F', b >= 18.5 && b < 25],
+          ['Overweight', '25.0 – 29.9', `${r1(25 * m2)} – ${r1(29.9 * m2)} kg`, '#0E4C6B', b >= 25 && b < 30],
+          ['Obesity', '30.0 or above', `More than ${r1(29.9 * m2)} kg`, '#5B2B6E', b >= 30],
+        ],
       };
     },
   },
@@ -79,10 +92,18 @@ const CALCS = [
     fields: base,
     run: (v) => {
       const b = bmr(v);
+      const D = ['Little or no exercise', 'Exercise 1–3 days/week', 'Exercise 3–5 days/week', 'Exercise 6–7 days/week', 'Hard exercise or physical job'];
       return {
         main: Math.round(b), unit: 'kcal / day', note: 'Mifflin-St Jeor equation',
         rows: [['Per hour', `${Math.round(b / 24)} kcal`]],
-        chart: { type: 'bars', unit: 'kcal', data: [['Sleep', b * 0.3], ['Resting', b * 0.7], ['Full day', b]] },
+        chart: { type: 'bars', unit: 'kcal', data: [['Sed.', b * ACTF[0]], ['Light', b * ACTF[1]], ['Mod.', b * ACTF[2]], ['Active', b * ACTF[3]], ['V. active', b * ACTF[4]]] },
+        levels: ACT.map((a, i) => [a, D[i], Math.round(b * ACTF[i])]),
+        info: [
+          ['What is BMR?', 'Basal Metabolic Rate is the number of calories your body burns at complete rest to keep you alive: breathing, circulation, temperature control and cell repair.'],
+          ['How it is calculated', 'This app uses the Mifflin-St Jeor equation.\nMen: 10 × weight (kg) + 6.25 × height (cm) − 5 × age + 5\nWomen: 10 × weight (kg) + 6.25 × height (cm) − 5 × age − 161'],
+          ['How to use it', 'Multiply your BMR by an activity factor to get your daily calorie needs (TDEE). Eating well below your BMR for long periods is not recommended without medical guidance.'],
+          ['What affects BMR?', 'Age, sex, height, weight and muscle mass all matter. More muscle raises BMR, and BMR usually falls slowly with age. Genetics, hormones and illness can also change it.'],
+        ],
       };
     },
   },
@@ -249,11 +270,19 @@ const Mark = ({ size = 44 }) => (
   </LinearGradient>
 );
 
+const GradText = ({ children, style, numberOfLines }) => (
+  <MaskedView style={{ flexShrink: 1 }} maskElement={<Text style={style} numberOfLines={numberOfLines}>{children}</Text>}>
+    <LinearGradient colors={GRAD} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+      <Text style={[style, { opacity: 0 }]} numberOfLines={numberOfLines}>{children}</Text>
+    </LinearGradient>
+  </MaskedView>
+);
+
 const GradButton = ({ label, onPress, icon }) => (
   <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
     <LinearGradient colors={GRAD} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={s.btn}>
       <Text style={s.btnTxt}>{label}</Text>
-      {icon && <Ionicons name={icon} size={20} color="#fff" style={{ marginLeft: 8 }} />}
+      {icon && <Ionicons name={icon} size={20} color="#fff" style={{ marginLeft: 8, marginTop: 8 }} />}
     </LinearGradient>
   </TouchableOpacity>
 );
@@ -262,7 +291,7 @@ const Header = ({ c, dark, setDark, left, title, right }) => (
   <View style={s.header}>
     <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
       {left}
-      {typeof title === 'string' ? <Text style={[s.hTitle, { color: c.text }]} numberOfLines={1}>{title}</Text> : title}
+      {typeof title === 'string' ? <GradText style={s.hTitle} numberOfLines={1}>{title}</GradText> : title}
     </View>
     {right}
     <TouchableOpacity onPress={() => setDark(!dark)} style={[s.iconBtn, { backgroundColor: c.card, borderColor: c.line }]} accessibilityLabel="Toggle dark mode">
@@ -338,6 +367,56 @@ function Chart({ c, ch }) {
   );
 }
 
+const WeightTable = ({ c, t }) => (
+  <View style={{ marginTop: 16, borderRadius: 14, borderWidth: 1, borderColor: c.line, overflow: 'hidden' }}>
+    <View style={{ flexDirection: 'row', padding: 12, backgroundColor: c.input }}>
+      <Text style={{ flex: 1.2, color: c.sub, fontSize: 12, fontWeight: '700' }}>BMI Category</Text>
+      <Text style={{ flex: 1, color: c.sub, fontSize: 12, fontWeight: '700' }}>Weight Range</Text>
+    </View>
+    {t.map(([name, bmi, range, col, on]) => (
+      <View key={name} style={{ flexDirection: 'row', alignItems: 'center', padding: 12, borderTopWidth: 1, borderColor: c.line, backgroundColor: on ? '#8B5CF622' : 'transparent' }}>
+        <View style={{ flex: 1.2, flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ width: 18, height: 18, borderRadius: 5, backgroundColor: col, marginRight: 10 }} />
+          <View>
+            <Text style={{ color: c.text, fontWeight: '600' }}>{name}</Text>
+            <Text style={{ color: c.sub, fontSize: 11 }}>{bmi}</Text>
+          </View>
+        </View>
+        <Text style={{ flex: 1, color: c.text, fontSize: 13 }}>{range}</Text>
+      </View>
+    ))}
+  </View>
+);
+
+const ActivityTable = ({ c, l }) => (
+  <View style={{ marginTop: 16, borderRadius: 14, borderWidth: 1, borderColor: c.line, overflow: 'hidden' }}>
+    <View style={{ flexDirection: 'row', padding: 12, backgroundColor: c.input }}>
+      <Text style={{ flex: 1.4, color: c.sub, fontSize: 12, fontWeight: '700' }}>Activity level</Text>
+      <Text style={{ flex: 1, color: c.sub, fontSize: 12, fontWeight: '700', textAlign: 'right' }}>Calories / day</Text>
+    </View>
+    {l.map(([n, d, k]) => (
+      <View key={n} style={{ flexDirection: 'row', alignItems: 'center', padding: 12, borderTopWidth: 1, borderColor: c.line }}>
+        <View style={{ flex: 1.4 }}>
+          <Text style={{ color: c.text, fontWeight: '600' }}>{n}</Text>
+          <Text style={{ color: c.sub, fontSize: 11 }}>{d}</Text>
+        </View>
+        <Text style={{ flex: 1, color: c.text, fontWeight: '700', textAlign: 'right' }}>{k.toLocaleString()} kcal</Text>
+      </View>
+    ))}
+  </View>
+);
+
+const InfoBlock = ({ c, i }) => (
+  <View style={{ marginTop: 16 }}>
+    {i.map(([t, b]) => (
+      <View key={t} style={{ marginBottom: 14 }}>
+        <Text style={{ color: c.text, fontWeight: '700', marginBottom: 4 }}>{t}</Text>
+        <Text style={{ color: c.sub, fontSize: 13, lineHeight: 20 }}>{b}</Text>
+      </View>
+    ))}
+  </View>
+);
+
 /* ---------- Screens ---------- */
 function Splash({ onStart }) {
   const sc = useRef(new Animated.Value(0.4)).current, rot = useRef(new Animated.Value(0)).current;
@@ -357,11 +436,13 @@ function Splash({ onStart }) {
     <View style={{ flex: 1, backgroundColor: T.dark.bg, alignItems: 'center', justifyContent: 'center', padding: 28 }}>
       <Animated.View style={{ transform: [{ scale: sc }, { rotate: spin }] }}><Mark size={112} /></Animated.View>
       <Animated.View style={{ opacity: op, alignItems: 'center', marginTop: 28 }}>
-        <Text style={{ color: T.dark.text, fontSize: 38, fontWeight: '800', letterSpacing: 0.5 }}>{BRAND}</Text>
+        <Text style={{ color: T.dark.text, fontSize: 38, fontWeight: '800', letterSpacing: 0.5 }}><View style={{ width: '100%' }}>
+          <GradText style={{ fontSize: 38, fontWeight: '800', letterSpacing: 0.5, textAlign: 'center' }}>{BRAND}</GradText>
+        </View></Text>
         <Text style={{ color: T.dark.sub, fontSize: 15, marginTop: 6 }}>Health numbers, made simple</Text>
       </Animated.View>
       <Animated.View style={{ opacity: btn, width: '100%', marginTop: 56, transform: [{ translateY: btn.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }}>
-        <GradButton label="Let's calculate" icon="arrow-forward" onPress={onStart} />
+        <GradButton label="Let's Calculate" icon="arrow-forward" onPress={onStart} />
       </Animated.View>
     </View>
   );
@@ -371,12 +452,12 @@ function Home({ c, dark, setDark, go }) {
   return (
     <View style={{ flex: 1 }}>
       <Header c={c} dark={dark} setDark={setDark}
-        title={<View style={{ flexDirection: 'row', alignItems: 'center' }}><Mark size={34} /><Text style={[s.hTitle, { color: c.text, marginLeft: 10 }]}>{BRAND}</Text></View>}
+        title={<View style={{ flexDirection: 'row', alignItems: 'center' }}><Mark size={34} /><View style={{ marginLeft: 10 }}><GradText style={s.hTitle}>{BRAND}</GradText></View></View>}
         right={<><IconBtn c={c} name="time-outline" label="History" onPress={() => go('history')} /><IconBtn c={c} name="settings-outline" label="Settings" onPress={() => go('settings')} /></>} />
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
-        <Text style={{ color: c.text, fontSize: 24, fontWeight: '700' }}>What do you want to calculate?</Text>
-        <Text style={{ color: c.sub, marginTop: 4, marginBottom: 16 }}>{CALCS.length} calculators, all on your device.</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+        <Text style={{ color: c.text, fontSize: 24, fontWeight: '700' }}>What do you want to Calculate?</Text>
+        <Text style={{ color: c.sub, marginTop: 4, marginBottom: 16 }}>{CALCS.length} Calculators, All on your device.</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', }}>
           {CALCS.map((k) => (
             <Pressable key={k.id} onPress={() => go(k.id)} style={({ pressed }) => [s.tile, { backgroundColor: c.card, borderColor: c.line, opacity: pressed ? 0.7 : 1 }]}>
               <View style={[s.tileIcon, { backgroundColor: c.input }]}><MCI name={k.icon} size={26} color="#B79BFF" /></View>
@@ -390,19 +471,19 @@ function Home({ c, dark, setDark, go }) {
   );
 }
 
-function Calc({ c, dark, setDark, calc, back, onSave  }) {
+function Calc({ c, dark, setDark, calc, back, onSave }) {
   const [vals, setVals] = useState(Object.fromEntries(calc.fields.map((f) => [f.k, f.def])));
   const [res, setRes] = useState(null);
   const set = (k, x) => { setVals({ ...vals, [k]: x }); setRes(null); };
   useEffect(() => { if (res && !res.error) onSave(calc, vals, res); }, [res]);
-  
+
   const submit = () => {
     const p = {};
     for (const f of calc.fields) {
       if (f.show && !f.show(vals)) continue;
       if (f.type === 'sel') p[f.k] = vals[f.k];
       else if (f.type === 'date') { p[f.k] = pd(vals[f.k]); if (!p[f.k]) return setRes({ error: `${f.label}: use YYYY-MM-DD.` }); }
-      else { p[f.k] = parseFloat(vals[f.k]); if (!(p[f.k] > 0)) return setRes({ error: `Enter a valid ${f.label.toLowerCase()}.` }); }
+      else { p[f.k] = parseFloat(vals[f.k]); if (!(p[f.k] > 0 || (f.zero && p[f.k] === 0))) return setRes({ error: `Enter a valid ${f.label.toLowerCase()}.` }); }
     }
     setRes(calc.run(p));
   };
@@ -437,7 +518,7 @@ function Calc({ c, dark, setDark, calc, back, onSave  }) {
         {res?.error && <Text style={{ color: '#FF6B5E', marginTop: 16, textAlign: 'center' }}>{res.error}</Text>}
         {res && !res.error && (
           <View style={[s.card, { backgroundColor: c.card, borderColor: c.line, marginTop: 16 }]}>
-            <Text style={{ color: c.sub, fontSize: 13 }}>Your result</Text>
+            <Text style={{ color: c.sub, fontSize: 13 }}>Your Result</Text>
             <Text style={{ color: c.text, fontSize: 44, fontWeight: '800', marginTop: 4 }}>{res.main}</Text>
             <Text style={{ color: c.text, fontSize: 15 }}>{res.unit}</Text>
             <Text style={{ color: c.sub, marginTop: 6 }}>{res.note}</Text>
@@ -447,6 +528,9 @@ function Calc({ c, dark, setDark, calc, back, onSave  }) {
                 <Text style={{ color: c.sub }}>{a}</Text><Text style={{ color: c.text, fontWeight: '600' }}>{b}</Text>
               </View>
             ))}
+            {res.levels && <ActivityTable c={c} l={res.levels} />}
+            {res.info && <InfoBlock c={c} i={res.info} />}
+            {res.table && <WeightTable c={c} t={res.table} />}
             <Text style={{ color: c.sub, fontSize: 11, marginTop: 8 }}>Estimates only, not medical advice.</Text>
           </View>
         )}
@@ -474,16 +558,16 @@ function Settings({ c, dark, setDark, go }) {
           <Text style={{ color: c.text, fontSize: 26, fontWeight: '800', marginTop: 12 }}>{BRAND}</Text>
           <Text style={{ color: c.sub, marginTop: 2 }}>Version {VERSION}</Text>
         </View>
-        <GradButton label="Open calculators" icon="calculator-outline" onPress={() => go('home')} />
+        <GradButton label="Open Calculators" icon="calculator-outline" onPress={() => go('home')} />
         <View style={[s.card, { backgroundColor: c.card, borderColor: c.line, marginTop: 20, paddingVertical: 4 }]}>
-          <Row icon="moon-outline" label="Dark mode"><Switch value={dark} onValueChange={setDark} trackColor={{ true: '#8B5CF6' }} /></Row>
+          <Row icon="moon-outline" label="Dark Mode"><Switch value={dark} onValueChange={setDark} trackColor={{ true: '#8B5CF6' }} /></Row>
           <Row icon="resize-outline" label="Units" value="Metric (kg, cm)" />
           <Row icon="time-outline" label="History" onPress={() => go('history')} />
-`         <Row icon="share-social-outline" label="Share app" onPress={shareApp} />
-          <Row icon="information-circle-outline" label="About app" onPress={() => go('doc:about')} />
-          <Row icon="pricetag-outline" label="App version" value={VERSION} />
-          <Row icon="mail-outline" label="Contact support" onPress={() => Linking.openURL(`mailto:${SUPPORT}?subject=${BRAND} support`)} />
-          <Row icon="shield-checkmark-outline" label="Privacy policy" onPress={() => go('doc:privacy')} />
+          <Row icon="share-social-outline" label="Share App" onPress={shareApp} />
+          <Row icon="information-circle-outline" label="About App" onPress={() => go('doc:about')} />
+          <Row icon="pricetag-outline" label="App Version" value={VERSION} />
+          <Row icon="mail-outline" label="Contact Support" onPress={() => Linking.openURL(`mailto:${SUPPORT}?subject=${BRAND} support`)} />
+          <Row icon="shield-checkmark-outline" label="Privacy Policy" onPress={() => go('doc:privacy')} />
           <Row icon="medkit-outline" label="Disclaimer" onPress={() => go('doc:disclaimer')} />
         </View>
         <Text style={{ color: c.sub, textAlign: 'center', fontSize: 12, marginTop: 20 }}>© {new Date().getFullYear()} {BRAND}. Not a substitute for medical advice.</Text>
@@ -510,6 +594,8 @@ export default function App() {
   const [screen, go] = useState('splash');
   const c = dark ? T.dark : T.light;
   const hist = useHistory();
+  const [fontsLoaded] = useAppFonts();
+  if (!fontsLoaded) return null;
   let view;
   if (screen === 'splash') view = <Splash onStart={() => go('home')} />;
   else if (screen === 'home') view = <Home c={c} dark={dark} setDark={setDark} go={go} />;
@@ -519,7 +605,7 @@ export default function App() {
   else view = <Calc key={screen} c={c} dark={dark} setDark={setDark} calc={CALCS.find((k) => k.id === screen)} back={() => go('home')} onSave={hist.add} />;
   const light = screen !== 'splash' && !dark;
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: screen === 'splash' ? T.dark.bg : c.bg, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: screen === 'splash' ? T.dark.bg : c.bg }}>
       <StatusBar barStyle={light ? 'dark-content' : 'light-content'} backgroundColor={screen === 'splash' ? T.dark.bg : c.bg} />
       {view}
     </SafeAreaView>
@@ -528,7 +614,7 @@ export default function App() {
 
 const s = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12 },
-  hTitle: { fontSize: 20, fontWeight: '800', flexShrink: 1 },
+  hTitle: { fontSize: 20, fontWeight: '800', flexShrink: 1, lineHeight: 26, includeFontPadding: false },
   iconBtn: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, marginLeft: 8 },
   btn: { height: 54, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   btnTxt: { color: '#fff', fontSize: 17, fontWeight: '700' },
