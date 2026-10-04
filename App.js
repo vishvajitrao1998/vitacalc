@@ -107,15 +107,22 @@ const CALCS = [
       };
     },
   },
-  {
+    {
     id: 'tdee', title: 'TDEE / Daily Calories', icon: 'lightning-bolt', desc: 'Total daily energy',
     fields: [...base, act],
     run: (v) => {
-      const t = bmr(v) * ACTF[ACT.indexOf(v.act)];
+      const b = bmr(v), i = ACT.indexOf(v.act), t = b * ACTF[i];
+      const L = ['Sedentary', 'Light Exercise', 'Moderate Exercise', 'Heavy Exercise', 'Athlete'];
       return {
         main: Math.round(t), unit: 'kcal / day', note: 'Maintenance calories',
-        rows: [['BMR', `${Math.round(bmr(v))} kcal`]],
+        summary: `Based on your stats, the best estimate for your maintenance calories is ${Math.round(t).toLocaleString()} calories per day, using the Mifflin-St Jeor formula, which is widely considered one of the most accurate. The table below shows the difference if you had selected a different activity level.`,
+        calTable: [['Basal Metabolic Rate', Math.round(b), false], ...L.map((n, k) => [n, Math.round(b * ACTF[k]), k === i])],
         chart: { type: 'bars', unit: 'kcal', data: [['Lose 0.5kg/wk', t - 550], ['Maintain', t], ['Gain 0.5kg/wk', t + 550]] },
+        info: [
+          ['What is TDEE?', 'Total Daily Energy Expenditure is the total number of calories you burn in a day, including your BMR, daily movement, exercise and digesting food.'],
+          ['How to use it', 'Eat around your TDEE to maintain your weight. Eating 300–500 calories below it leads to gradual weight loss, and 250–500 above it supports weight gain.'],
+          ['Choosing an activity level', 'Pick the level that matches a typical week for you. If you are unsure, choose the lower one, because most people overestimate how active they are.'],
+        ],
       };
     },
   },
@@ -417,6 +424,17 @@ const InfoBlock = ({ c, i }) => (
   </View>
 );
 
+const CalTable = ({ c, t }) => (
+  <View style={{ marginTop: 16, borderRadius: 14, borderWidth: 1, borderColor: c.line, overflow: 'hidden' }}>
+    {t.map(([n, k, on], i) => (
+      <View key={n} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderTopWidth: i ? 1 : 0, borderColor: c.line, backgroundColor: on ? '#8B5CF622' : i === 0 ? c.input : 'transparent' }}>
+        <Text style={{ color: c.text, fontWeight: on ? '700' : '500', flexShrink: 1, paddingRight: 8 }}>{n}</Text>
+        <Text style={{ color: c.text, fontWeight: '700' }}>{k.toLocaleString()} <Text style={{ color: c.sub, fontWeight: '400', fontSize: 12 }}>cal / day</Text></Text>
+      </View>
+    ))}
+  </View>
+);
+
 /* ---------- Screens ---------- */
 function Splash({ onStart }) {
   const sc = useRef(new Animated.Value(0.4)).current, rot = useRef(new Animated.Value(0)).current;
@@ -523,14 +541,16 @@ function Calc({ c, dark, setDark, calc, back, onSave }) {
             <Text style={{ color: c.text, fontSize: 15 }}>{res.unit}</Text>
             <Text style={{ color: c.sub, marginTop: 6 }}>{res.note}</Text>
             {res.chart && <View style={{ marginTop: 20 }}><Chart c={c} ch={res.chart} /></View>}
+            {res.summary && <Text style={{ color: c.sub, fontSize: 13, lineHeight: 20, marginTop: 16 }}>{res.summary}</Text>}
+            {res.calTable && <CalTable c={c} t={res.calTable} />}
+            {res.levels && <ActivityTable c={c} l={res.levels} />}
+            {res.table && <WeightTable c={c} t={res.table} />}
             {res.rows?.map(([a, b]) => (
               <View key={a} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderTopWidth: 1, borderColor: c.line, marginTop: 8 }}>
                 <Text style={{ color: c.sub }}>{a}</Text><Text style={{ color: c.text, fontWeight: '600' }}>{b}</Text>
               </View>
             ))}
-            {res.levels && <ActivityTable c={c} l={res.levels} />}
             {res.info && <InfoBlock c={c} i={res.info} />}
-            {res.table && <WeightTable c={c} t={res.table} />}
             <Text style={{ color: c.sub, fontSize: 11, marginTop: 8 }}>Estimates only, not medical advice.</Text>
           </View>
         )}
