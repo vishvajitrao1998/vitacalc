@@ -1,9 +1,9 @@
 import { Ionicons, MaterialCommunityIcons as MCI } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system/legacy'; // SDK 53 or older: use 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, ScrollView, Share, TouchableOpacity, View } from 'react-native';
+import { Alert, BackHandler, ScrollView, Share, TouchableOpacity, View } from 'react-native';
 import { Text } from './fonts';
 const NAME = 'VitaCalc';
 const KEY = 'vitacalc_history';
@@ -56,6 +56,11 @@ export function useHistory() {
 
 export function HistoryScreen({ c, dark, setDark, go, h, Header, IconBtn, Chart }) {
   const [sel, setSel] = useState(null);
+  useEffect(() => {
+  if (!sel) return;
+  const sub = BackHandler.addEventListener('hardwareBackPress', () => { setSel(null); return true; });
+  return () => sub.remove();
+}, [sel]);
   const card = { backgroundColor: c.card, borderColor: c.line, borderWidth: 1, borderRadius: 22, padding: 18 };
 
   if (sel) {

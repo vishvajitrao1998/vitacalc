@@ -3,7 +3,9 @@ import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
 import {
-  Animated, Easing,
+  Animated,
+  BackHandler,
+  Easing,
   Linking,
   Pressable,
   ScrollView,
@@ -15,9 +17,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
-import { AdBanner, initAds } from './ads';
+import { AdBanner, initAds, maybeShowInterstitial } from './ads';
 import { Text, TextInput, useAppFonts } from './fonts';
 import { HistoryScreen, shareApp, useHistory } from './history';
+
 /* ---------- Brand & theme ---------- */
 const BRAND = 'VitaCalc';
 const VERSION = '1.0.0';
@@ -616,6 +619,18 @@ export default function App() {
   const c = dark ? T.dark : T.light;
   const hist = useHistory();
   const [fontsLoaded] = useAppFonts();
+  useEffect(() => {
+  const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+    if (screen === 'splash' || screen === 'home') return false; // let the app exit
+    if (screen.startsWith('doc:')) go('settings');
+    else {
+      if (screen !== 'settings' && screen !== 'history') maybeShowInterstitial(3);
+      go('home');
+    }
+    return true;
+  });
+  return () => sub.remove();
+}, [screen]);
   if (!fontsLoaded) return null;
   let view;
   if (screen === 'splash') view = <Splash onStart={() => go('home')} />;

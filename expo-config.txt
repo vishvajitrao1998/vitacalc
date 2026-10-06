@@ -1,0 +1,209 @@
+
+{
+  name: [32m'vitacalc'[39m,
+  slug: [32m'vitacalc'[39m,
+  version: [32m'1.0.0'[39m,
+  orientation: [32m'portrait'[39m,
+  icon: [32m'./assets/images/icon.png'[39m,
+  scheme: [32m'vitacalc'[39m,
+  userInterfaceStyle: [32m'automatic'[39m,
+  plugins: [
+    [32m'expo-router'[39m,
+    [
+      [32m'expo-splash-screen'[39m,
+      {
+        backgroundColor: [32m'#208AEF'[39m,
+        image: [32m'./assets/images/splash-icon.png'[39m,
+        imageWidth: [33m76[39m
+      }
+    ],
+    [
+      [32m'react-native-google-mobile-ads'[39m,
+      {
+        androidAppId: [32m'ca-app-pub-3940256099942544~3347511713'[39m,
+        iosAppId: [32m'ca-app-pub-3940256099942544~1458002511'[39m
+      }
+    ],
+    [32m'expo-sharing'[39m,
+    [32m'expo-font'[39m
+  ],
+  description: [90mundefined[39m,
+  sdkVersion: [32m'57.0.0'[39m,
+  platforms: [
+    [32m'ios'[39m,
+    [32m'android'[39m,
+    [32m'web'[39m
+  ],
+  ios: {
+    icon: [32m'./assets/expo.icon'[39m,
+    bundleIdentifier: [32m'com.placeholder.appid'[39m
+  },
+  android: {
+    predictiveBackGestureEnabled: [33mfalse[39m,
+    package: [32m'com.vishvajitrao1998.vitacalc'[39m,
+    permissions: [
+      [32m'android.permission.READ_EXTERNAL_STORAGE'[39m,
+      [32m'android.permission.WRITE_EXTERNAL_STORAGE'[39m,
+      [32m'android.permission.INTERNET'[39m
+    ],
+    adaptiveIcon: {
+      backgroundColor: [32m'#E6F4FE'[39m,
+      foregroundImage: [32m'./assets/images/android-icon-foreground.png'[39m,
+      backgroundImage: [32m'./assets/images/android-icon-background.png'[39m,
+      monochromeImage: [32m'./assets/images/android-icon-monochrome.png'[39m
+    }
+  },
+  experiments: {
+    typedRoutes: [33mtrue[39m,
+    reactCompiler: [33mtrue[39m
+  },
+  _internal: {
+    isDebug: [33mfalse[39m,
+    projectRoot: [32m'D:\\React Native\\vitacalc'[39m,
+    staticConfigPath: [32m'D:\\React Native\\vitacalc\\app.json'[39m,
+    packageJsonPath: [32m'D:\\React Native\\vitacalc\\package.json'[39m,
+    autolinkedModules: [
+      [32m'@expo/dom-webview'[39m,
+      [32m'@expo/log-box'[39m,
+      [32m'@expo/ui'[39m,
+      [32m'expo'[39m,
+      [32m'expo-asset'[39m,
+      [32m'expo-constants'[39m,
+      [32m'expo-device'[39m,
+      [32m'expo-file-system'[39m,
+      [32m'expo-font'[39m,
+      [32m'expo-glass-effect'[39m,
+      [32m'expo-image'[39m,
+      [32m'expo-keep-awake'[39m,
+      [32m'expo-linear-gradient'[39m,
+      [32m'expo-linking'[39m,
+      [32m'expo-modules-core'[39m,
+      [32m'expo-modules-jsi'[39m,
+      [32m'expo-router'[39m,
+      [32m'expo-sharing'[39m,
+      [32m'expo-splash-screen'[39m,
+      [32m'expo-status-bar'[39m,
+      [32m'expo-symbols'[39m,
+      [32m'expo-system-ui'[39m,
+      [32m'expo-web-browser'[39m
+    ],
+    dynamicConfigPath: {},
+    pluginHistory: {
+      [32m'expo-splash-screen'[39m: {
+        name: [32m'expo-splash-screen'[39m,
+        version: [32m'57.0.9'[39m
+      },
+      [32m'expo-sharing'[39m: {
+        name: [32m'expo-sharing'[39m,
+        version: [32m'57.0.22'[39m
+      },
+      [32m'expo-font'[39m: {
+        name: [32m'expo-font'[39m,
+        version: [32m'57.0.4'[39m
+      },
+      [32m'react-native-maps'[39m: {
+        name: [32m'react-native-maps'[39m,
+        version: [32m'UNVERSIONED'[39m
+      },
+      [32m'expo-apple-authentication'[39m: {
+        name: [32m'expo-apple-authentication'[39m,
+        version: [32m'UNVERSIONED'[39m
+      },
+      [32m'expo-contacts'[39m: {
+        name: [32m'expo-contacts'[39m,
+        version: [32m'UNVERSIONED'[39m
+      },
+      [32m'expo-notifications'[39m: {
+        name: [32m'expo-notifications'[39m,
+        version: [32m'UNVERSIONED'[39m
+      },
+      [32m'expo-updates'[39m: {
+        name: [32m'expo-updates'[39m,
+        version: [32m'UNVERSIONED'[39m
+      },
+      [32m'expo-document-picker'[39m: {
+        name: [32m'expo-document-picker'[39m,
+        version: [32m'UNVERSIONED'[39m
+      },
+      [32m'expo-system-ui'[39m: {
+        name: [32m'expo-system-ui'[39m,
+        version: [32m'57.0.4'[39m
+      },
+      [32m'expo-file-system'[39m: {
+        name: [32m'expo-file-system'[39m,
+        version: [32m'57.0.7'[39m
+      }
+    }
+  },
+  mods: {
+    ios: {
+      infoPlist: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      podfile: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      dangerous: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      splashScreenStoryboard: [AsyncFunction: interceptingMod] {
+        isProvider: [33mtrue[39m,
+        isIntrospective: [33mtrue[39m
+      },
+      xcodeproj: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      appDelegate: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      entitlements: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      expoPlist: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      podfileProperties: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      }
+    },
+    android: {
+      mainActivity: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      dangerous: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      colors: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      colorsNight: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      styles: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      strings: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      manifest: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      gradleProperties: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      settingsGradle: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      projectBuildGradle: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      },
+      appBuildGradle: [AsyncFunction: interceptingMod] {
+        isProvider: [33mfalse[39m
+      }
+    }
+  },
+  extra: {
+    router: {}
+  }
+}
+

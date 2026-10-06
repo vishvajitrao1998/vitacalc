@@ -17,11 +17,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "predictiveBackGestureEnabled": false,
+      "package": "com.vishvajitrao1998.vitacalc"
     },
     "plugins": [
       "expo-router",
@@ -33,17 +30,25 @@
           "imageWidth": 76
         }
       ],
-      ["react-native-google-mobile-ads", {
-        "androidAppId": "ca-app-pub-3940256099942544~3347511713",
-        "iosAppId": "ca-app-pub-3940256099942544~1458002511"
-      }],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
+        }
+      ],
       "expo-sharing",
-      "expo-font",
-      "react-native-google-mobile-ads"
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a6a130c2-37f9-4407-8057-11386b452234"
+      }
     }
   }
 }
