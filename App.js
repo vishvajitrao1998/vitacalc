@@ -475,6 +475,7 @@ function Home({ c, dark, setDark, go }) {
       <Header c={c} dark={dark} setDark={setDark}
         title={<View style={{ flexDirection: 'row', alignItems: 'center' }}><Mark size={34} /><View style={{ marginLeft: 10 }}><GradText style={s.hTitle}>{BRAND}</GradText></View></View>}
         right={<><IconBtn c={c} name="time-outline" label="History" onPress={() => go('history')} /><IconBtn c={c} name="settings-outline" label="Settings" onPress={() => go('settings')} /></>} />
+
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
         <GradText style={s.hTitle}><Text style={{ color: c.text, fontSize: 24, fontWeight: '700' }}>Making Health Calculations Easy!</Text></GradText>
         <Text style={{ color: c.sub, marginTop: 4, marginBottom: 16 }}>{CALCS.length} Calculators, All on your Device.Enjoy Your Calculations !</Text>
@@ -511,6 +512,7 @@ function Calc({ c, dark, setDark, calc, back, onSave }) {
   return (
     <View style={{ flex: 1 }}>
       <Header c={c} dark={dark} setDark={setDark} title={calc.title} left={<IconBtn c={c} name="chevron-back" label="Back" onPress={back} />} />
+      <AdBanner />
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
         <View style={[s.card, { backgroundColor: c.card, borderColor: c.line }]}>
           {calc.fields.filter((f) => !f.show || f.show(vals)).map((f) => (
